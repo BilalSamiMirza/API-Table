@@ -9,7 +9,7 @@ const UserDetail = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`https://dummyjson.com/users/${id}`)
+    fetch(`http://localhost:3000/users/${id}`)
       .then((res) => res.json())
       .then((data) => {
         setUser(data);
@@ -24,11 +24,11 @@ const UserDetail = () => {
       <Card className={styles.userCard}>
         <CardContent>
           <Typography variant="h4" gutterBottom>User Detail</Typography>
-          <Typography variant="h6">Name: {user.firstName} {user.lastName}</Typography>
+          <Typography variant="h6">Name: {user.name} {user.username}</Typography>
           <Typography>Email: {user.email}</Typography>
           <Typography>Phone: {user.phone}</Typography>
           <Typography>
-            Address: {user.address?.address}, {user.address?.city}, {user.address?.country}
+            Address: {user.address.street}, {user.address.city}, {user.address.suite}
           </Typography>
         </CardContent>
       </Card>

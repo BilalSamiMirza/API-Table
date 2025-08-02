@@ -14,17 +14,43 @@ import {
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 const EmployeeTable = () => {
   const [employees, setEmployees] = useState([]);
   const [selected, setSelected] = useState([]);
   const navigate = useNavigate();
 
+  const deleteUser = (userId) => {
+
+
+  axios
+    .delete(`http://localhost:3000/users/${userId}`)
+    .then(() => {
+      alert("User deleted successfully.");
+      setEmployees((prev) => prev.filter((user) => user.id !== userId));
+    })
+    .catch((err) => {
+      console.log("Error deleting user:", err);
+    });
+};
+
+
   useEffect(() => {
-    fetch('https://dummyjson.com/users')
-      .then((res) => res.json())
-      .then((data) => setEmployees(data.users));
+    axios.get('http://localhost:3000/users')
+    .then((response) => {
+      setEmployees(response.data);
+    })
+    .catch((error) => {
+      console.error('Error fetching employees:', error);
+    });
   }, []);
+
+  // useEffect(() => {
+  //   fetch('https://dummyjson.com/users')
+  //     .then((res) => res.json())
+  //     .then((data) => setEmployees(data.users));
+  // }, []);
 
   const handleSelect = (id) => {
     setSelected((prev) =>
@@ -46,7 +72,7 @@ const EmployeeTable = () => {
                   checked={employees.length > 0 && selected.length === employees.length}
                   onChange={(e) => {
                     if (e.target.checked) {
-                      setSelected(employees.map((emp) => emp.id));
+                      setSelected(employees.map((e) => e.id));
                     } else {
                       setSelected([]);
                     }
@@ -61,23 +87,36 @@ const EmployeeTable = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {employees.map((emp) => (
-              <TableRow key={emp.id} hover onClick={() => navigate(`/user/${emp.id}`)} style={{ cursor: 'pointer' }}>
+            {employees.map((e) => (
+              <TableRow key={e.id} hover onClick={() => navigate(`/user/${e.id}`)} style={{ cursor: 'pointer' }}>
                 <TableCell padding="checkbox" onClick={(e) => e.stopPropagation()}>
                   <Checkbox
-                    checked={selected.includes(emp.id)}
-                    onChange={() => handleSelect(emp.id)}
+                    checked={selected.includes(e.id)}
+                    onChange={() => handleSelect(e.id)}
                   />
                 </TableCell>
-                <TableCell>{emp.firstName} {emp.lastName}</TableCell>
-                <TableCell>{emp.email}</TableCell>
-                <TableCell>
-                  {emp.address?.address}, {emp.address?.city}, {emp.address?.country}
-                </TableCell>
-                <TableCell>{emp.phone}</TableCell>
+                <TableCell>{e.name} {e.username}</TableCell>
+                <TableCell>{e.email}</TableCell>
+<TableCell>
+  {
+    e.address 
+      ? typeof e.address === "object"
+        ? [e.address.street, e.address.city, e.address.suite].filter(Boolean).join(", ")
+        : e.address.split(",").map(part => part.trim()).filter(Boolean).join(", ")
+      : ""
+  }
+</TableCell>
+
+                <TableCell>{e.phone}</TableCell>
                 <TableCell onClick={(e) => e.stopPropagation()}>
-                  <EditIcon color="primary" />
-                  <DeleteIcon color="error" />
+                   <EditIcon
+                    onClick={() => navigate(`/EditUser/${e.id}`)}
+                    sx={{ cursor: "pointer", color: "green", marginRight: 2 }}
+                  />
+                    <DeleteIcon
+                    onClick={() => deleteUser(e.id)}
+                    sx={{ cursor: "pointer", color: "red" }}
+                  />
                 </TableCell>
               </TableRow>
             ))}
